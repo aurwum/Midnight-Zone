@@ -1,0 +1,9 @@
+{
+  "name": "MIDNIGHT ZONE — Ausstellungsbegleiter",
+  "short_name": "MIDNIGHT ZONE",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#061626",
+  "theme_color": "#061626",
+  "description": "Interaktiver Begleiter für die Ausstellung MIDNIGHT ZONE"
+}

@@ -1,0 +1,865 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#061626">
+    <meta name="description" content="Interaktiver Ausstellungsbegleiter MIDNIGHT ZONE">
+    <title>MIDNIGHT ZONE — Ausstellungsbegleiter</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --ink: #f4f7fb;
+            --muted: #b6c8d9;
+            --navy: #061626;
+            --blue: #0b2847;
+            --cyan: #49d5f6;
+            --line: rgba(255, 255, 255, .15);
+            --ease: cubic-bezier(.2, .75, .2, 1);
+            --plain-bg: rgb(18, 26, 34)
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        /* subtle grain so flat gradients don't look synthetic */
+        body:before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            pointer-events: none;
+            opacity: .05;
+            mix-blend-mode: overlay;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-snap-type: y proximity
+        }
+
+        body {
+            margin: 0;
+            background: var(--navy);
+            color: var(--ink);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+            line-height: 1.55;
+            font-weight: 400
+        }
+
+        button, input, textarea {
+            font: inherit
+        }
+
+        section {
+            min-height: 100svh;
+            position: relative;
+            padding: clamp(28px, 6vw, 90px) clamp(20px, 7vw, 100px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            scroll-snap-align: start;
+            overflow: hidden
+        }
+
+        .wrap {
+            width: min(1120px, 100%);
+            margin: auto
+        }
+
+        .kicker {
+            font-size: .78rem;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: #9fc6e7;
+            margin-bottom: 16px
+        }
+
+        .headline {
+            font-size: clamp(2rem, 5vw, 4.4rem);
+            line-height: 1.08;
+            letter-spacing: -.035em;
+            font-weight: 500;
+            margin: 0 0 28px;
+            max-width: 1000px
+        }
+
+        .bodycopy {
+            font-size: clamp(1.02rem, 1.5vw, 1.28rem);
+            color: #eaf2f9;
+            max-width: 800px
+        }
+
+        .cover {
+            padding: 0;
+            min-height: 100svh;
+            background: #030d17
+        }
+
+        .cover:before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: url('assets/cover-diver.png') center 38%/cover no-repeat;
+            transform: scale(1.015);
+            animation: slowzoom 22s ease-in-out infinite alternate
+        }
+
+        .cover:after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(3, 11, 19, .28), rgba(3, 11, 19, .05) 40%, rgba(3, 11, 19, .72))
+        }
+
+        .cover-title {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            align-self: flex-start;
+            width: 100%;
+            padding: 10vh 16px 0;
+            font-size: clamp(2.6rem, 9vw, 7rem);
+            font-weight: 300;
+            letter-spacing: .14em
+        }
+
+        .cover-bottom {
+            position: absolute;
+            z-index: 1;
+            bottom: 5vh;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: #d5e5f3;
+            letter-spacing: .12em;
+            font-size: .78rem;
+            text-transform: uppercase
+        }
+
+        .scrollhint {
+            display: block;
+            margin: 18px auto 0;
+            width: 26px;
+            height: 42px;
+            border: 1px solid #c7d8e8a8;
+            border-radius: 18px;
+            position: relative
+        }
+
+        .scrollhint:after {
+            content: "";
+            position: absolute;
+            width: 3px;
+            height: 7px;
+            border-radius: 4px;
+            background: #eaf5ff;
+            left: 11px;
+            top: 8px;
+            animation: scrollDot 1.7s ease-in-out infinite
+        }
+
+        @keyframes slowzoom {
+            to {
+                transform: scale(1.06)
+            }
+        }
+
+        @keyframes scrollDot {
+            0%, 100% {
+                transform: translateY(0);
+                opacity: .3
+            }
+            50% {
+                transform: translateY(12px);
+                opacity: 1
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0)
+            }
+            50% {
+                transform: translateY(-12px)
+            }
+        }
+
+        .mood-section {
+            background: var(--plain-bg)
+        }
+
+        .mood-layout {
+            display: grid;
+            grid-template-columns:minmax(0, 1.1fr) minmax(220px, .8fr);
+            gap: 36px;
+            align-items: center
+        }
+
+        .ocean-visual {
+            min-height: 420px;
+            border-radius: 24px;
+            overflow: hidden;
+            position: relative;
+            background: url('assets/ocean-depth.png') center/cover no-repeat;
+            box-shadow: inset 0 0 70px rgba(2, 10, 20, .5)
+        }
+
+        .ocean-visual:after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(77, 176, 255, .04), rgba(2, 9, 19, .12) 45%, rgba(2, 9, 19, .4));
+            pointer-events: none
+        }
+
+        .mood-options {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 24px 16px
+        }
+
+        .mood-btn {
+            border: 1px solid transparent;
+            background: rgba(5, 17, 31, .2);
+            color: white;
+            text-align: left;
+            padding: 9px 13px;
+            border-radius: 16px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            transition: background .25s, border .25s, transform .25s
+        }
+
+        .mood-btn:hover, .mood-btn.active {
+            background: rgba(4, 20, 36, .7);
+            border-color: rgba(123, 226, 255, .65);
+            transform: translateX(4px)
+        }
+
+        .mood-btn small {
+            display: block;
+            color: #d0e2f3
+        }
+
+        .section-number {
+            position: absolute;
+            right: clamp(20px, 7vw, 100px);
+            top: 34px;
+            font-size: .75rem;
+            letter-spacing: .16em;
+            color: #86a8c4
+        }
+
+        .task-section {
+            background: var(--plain-bg)
+        }
+
+
+        .task-section.with-img {
+            padding-top: clamp(64px, 9vw, 110px)
+        }
+
+        .exhibit-img {
+            margin: 0 0 28px;
+            max-width: 850px
+        }
+
+        .exhibit-img img {
+            width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 12px;
+            display: block;
+            background: #030d17
+        }
+
+        .task-card {
+            margin-top: 28px;
+            max-width: 850px;
+            padding: 0
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            resize: vertical;
+            background: transparent;
+            border: 1px solid rgba(186, 219, 244, .25);
+            border-radius: 10px;
+            color: white;
+            padding: 12px 14px;
+            outline: none;
+            transition: border-color .2s
+        }
+
+        textarea:focus {
+            border-color: #8fc9e4
+        }
+
+        textarea::placeholder {
+            color: #8094a3
+        }
+
+        .save-note {
+            font-size: .78rem;
+            color: #8ba8c2;
+            margin-top: 8px
+        }
+
+        .draw-wrap {
+            background: #fff;
+            border-radius: 14px;
+            overflow: hidden;
+            touch-action: none;
+            width: 100%;
+            aspect-ratio: 1200 / 760
+        }
+
+        .draw-wrap canvas {
+            width: 100%;
+            height: 100%;
+            display: block
+        }
+
+        .canvas-tools {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 14px
+        }
+
+        .tool-btn {
+            border: 1px solid #284762;
+            background: #0b2238;
+            color: #eaf5ff;
+            border-radius: 10px;
+            padding: 8px 12px;
+            cursor: pointer
+        }
+
+        .tool-btn.active {
+            border-color: var(--cyan);
+            background: #123954
+        }
+
+        .swatch {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, .3);
+            cursor: pointer
+        }
+
+        .swatch.selected {
+            outline: 2px solid white;
+            outline-offset: 2px
+        }
+
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            color: #d5e8f6;
+            font-size: .86rem;
+            margin-top: 10px
+        }
+
+        .human-slider {
+            background: #07172a;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            padding: 20px
+        }
+
+        .human-slider img {
+            width: 100%;
+            max-height: 220px;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+            opacity: .8
+        }
+
+        .slider-wrap {
+            padding: 20px 6px 4px
+        }
+
+        .slider-wrap input {
+            width: 100%;
+            accent-color: #49d5f6
+        }
+
+        .slider-readout {
+            text-align: center;
+            color: #d7ebfa;
+            margin-top: 6px
+        }
+
+        .rest {
+            background: var(--plain-bg)
+        }
+
+        .bubbles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: .35;
+            z-index: 1
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: -70px;
+            width: 8px;
+            height: 8px;
+            border: 1px solid #8bcff3;
+            border-radius: 50%;
+            animation: rise 14s linear infinite
+        }
+
+        .bubble:nth-child(2) {
+            left: 22%;
+            animation-delay: 3s;
+            width: 14px;
+            height: 14px
+        }
+
+        .bubble:nth-child(3) {
+            left: 52%;
+            animation-delay: 1s
+        }
+
+        .bubble:nth-child(4) {
+            left: 78%;
+            animation-delay: 5s;
+            width: 18px;
+            height: 18px
+        }
+
+        .bubble:nth-child(5) {
+            left: 35%;
+            animation-delay: 8s;
+            width: 10px;
+            height: 10px
+        }
+
+        .bubble:nth-child(6) {
+            left: 63%;
+            animation-delay: 6s;
+            width: 6px;
+            height: 6px
+        }
+
+        @keyframes rise {
+            from {
+                transform: translateY(0);
+                opacity: 0
+            }
+            10% {
+                opacity: 1
+            }
+            90% {
+                opacity: 1
+            }
+            to {
+                transform: translateY(calc(-100vh - 140px));
+                opacity: 0
+            }
+        }
+
+        .compare {
+            display: grid;
+            grid-template-columns:1fr 1fr;
+            gap: 14px;
+            margin-top: 20px
+        }
+
+        .compare-card {
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 16px;
+            background: rgba(255, 255, 255, .03)
+        }
+
+        .compare-card strong {
+            display: block;
+            color: #b9d6ee;
+            margin-bottom: 6px
+        }
+
+        .top-progress {
+            position: fixed;
+            z-index: 10;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: var(--cyan);
+            width: 0;
+            box-shadow: 0 0 10px #49d5f6;
+            transition: width .12s
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(22px);
+            transition: opacity .8s var(--ease), transform .8s var(--ease)
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: none
+        }
+
+        .tiny {
+            color: var(--muted);
+            font-size: .86rem
+        }
+
+        @media (max-width: 760px) {
+            .mood-layout {
+                grid-template-columns:1fr;
+                gap: 20px
+            }
+
+            .ocean-visual {
+                min-height: 380px
+            }
+
+            .headline {
+                margin-bottom: 18px
+            }
+
+            .section-number {
+                top: 18px
+            }
+
+            .task-card {
+                margin-top: 18px
+            }
+
+            .compare {
+                grid-template-columns:1fr
+            }
+
+            .cover-title {
+                letter-spacing: .09em;
+                padding-top: 9vh
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto
+            }
+
+            *, *:before, *:after {
+                animation: none !important;
+                transition: none !important
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="top-progress" id="progress"></div>
+<div class="bubbles"><i class="bubble" style="left:8%"></i><i class="bubble"></i><i class="bubble"
+                                                                                    style="left:44%"></i><i
+        class="bubble"></i><i class="bubble" style="left:35%"></i><i class="bubble" style="left:63%"></i></div>
+<section class="cover" id="s1"><h1 class="cover-title">MIDNIGHT ZONE</h1>
+    <div class="cover-bottom">Ein Ausstellungsbegleiter · nach unten scrollen<span class="scrollhint"></span></div>
+</section>
+<section class="mood-section" id="s2"><span class="section-number">02 / 10</span>
+    <div class="wrap reveal">
+        <h2 class="headline">Wie geht es dir gerade?</h2>
+        <p class="bodycopy">Finde deine Stimmung im Meer. Je tiefer du gehst, desto dunkler wird es.</p>
+        <div class="mood-layout">
+            <div class="ocean-visual">
+                <div class="mood-options" id="mood-start"></div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="task-section" id="s3"><span class="section-number">03 / 10</span>
+    <div class="wrap reveal">
+        <p class="bodycopy">Du betrittst die Ausstellung. Du bist von Bildern umgeben, wo die Menschen draufstehen.
+            Diese Serie von Bildern heißt "Where the Waters meet". Betrachte diese Werke und stell dir vor, alle
+            Menschen wären verschwunden. Wie wird es jetzt wirken? Würden die Werke noch dieselbe Geschichte
+            erzählen?</p>
+        <div class="task-card"><textarea data-save="answer-3" placeholder="Deine Gedanken …"></textarea>
+        </div>
+    </div>
+</section>
+<section class="task-section with-img" id="s4"><span class="section-number">04 / 10</span>
+    <div class="wrap reveal">
+        <figure class="exhibit-img"><img src="assets/Muscheln.jpg" alt="Beleuchtete Vitrine mit vielen Muscheln und Ammoniten auf Glasböden" loading="lazy"></figure>
+        <p class="bodycopy" style="font-size:clamp(1.22rem, 2vw, 1.4rem)">Du gehst weiter den dunklen Flur entlang.
+            Neben einer Liege befindet sich eine beleuchtete Vitrine. Da drinne sind verschiedene Muscheln platziert.
+            Vergleiche die Muscheln. Welche davon ist am auffälligsten für dich? Zeichne die.</p>
+        <div class="task-card">
+            <div class="canvas-tools" id="tools">
+                <button class="tool-btn active" data-tool="pen">✎ Stift</button>
+                <button class="tool-btn" data-tool="eraser">⌫ Radierer</button>
+                <label class="tiny">Stärke <input type="range" id="size" min="2" max="30" value="5"></label>
+                <button class="tool-btn" id="undo">↶ Zurück</button>
+                <button class="tool-btn" id="clear">Leeren</button>
+                <span class="tiny">Farbe:</span>
+                <button class="swatch selected" data-color="#111111" style="background:#111"
+                        aria-label="Schwarz"></button>
+                <button class="swatch" data-color="#1e72d2" style="background:#1e72d2" aria-label="Blau"></button>
+                <button class="swatch" data-color="#e44948" style="background:#e44948" aria-label="Rot"></button>
+                <button class="swatch" data-color="#1a9c67" style="background:#1a9c67" aria-label="Grün"></button>
+                <button class="swatch" data-color="#f2b82e" style="background:#f2b82e" aria-label="Gelb"></button>
+                <button class="swatch" data-color="#9a5bce" style="background:#9a5bce" aria-label="Violett"></button>
+            </div>
+            <div class="draw-wrap">
+                <canvas id="drawing" width="1200" height="760"
+                        aria-label="Zeichenfläche zum Zeichnen einer Muschel"></canvas>
+            </div>
+            <div class="save-note"></div>
+        </div>
+    </div>
+</section>
+<section class="task-section with-img" id="s5"><span class="section-number">05 / 10</span>
+    <div class="wrap reveal">
+        <figure class="exhibit-img"><img src="assets/49Monitore.jpg" alt="Wand aus 49 Monitoren mit Unterwasseraufnahmen in Blau- und Grüntönen" loading="lazy"></figure>
+        <p class="bodycopy">Nun siehst du eine Collage mit einem provokanten Namen "The Gods must be crazy". Betrachte
+            jedes Bild genauer. Wie wirkt die Collage auf dich? Wirkt sie anders als ein einzelnes Bild? Was kann der
+            Name bedeuten?</p>
+        <div class="task-card"><textarea data-save="answer-5" placeholder="Deine Gedanken …"></textarea>
+        </div>
+    </div>
+</section>
+<section class="task-section with-img" id="s6"><span class="section-number">06 / 10</span>
+    <div class="wrap reveal">
+        <figure class="exhibit-img"><img src="assets/Spigelraum.jpg" alt="Dunkler Spiegelraum mit hängenden Leuchten, die sich unendlich spiegeln" loading="lazy"></figure>
+        <p class="bodycopy">Plötzlich stehst du in einem Raum mit Spiegeln. Im Gegensatz zu der dunklen Ausstellung
+            davor, ist dieser Raum sehr hell. Welches Gefühl löst er in dir aus? Durch welche Mitteln wird dieses Gefühl
+            erzeugt?</p>
+        <div class="task-card"><textarea data-save="answer-6" placeholder="Deine Gedanken …"></textarea>
+        </div>
+    </div>
+</section>
+<section class="task-section" id="s7"><span class="section-number">07 / 10</span>
+    <div class="wrap reveal">
+        <p class="bodycopy">Du findest einen Brunnen. Statt Wasser, fließt da Feuer. Vermute, warum der Künstler mit
+            Feuer statt Wasser arbeitet.</p>
+        <div class="task-card"><textarea data-save="answer-7" placeholder="Deine Vermutung …"></textarea>
+        </div>
+    </div>
+</section>
+<section class="task-section" id="s8"><span class="section-number">08 / 10</span>
+    <div class="wrap reveal">
+        <p class="bodycopy">Jetzt kommst du in einen hellen, weißen Raum. Wähle ein Kunstwerk aus, in dem das
+            Zusammenspiel von Mensch und Natur deutlich wird. Beschreibe deinen Eindruck in drei Ebenen (<b>Ich sehe,
+                ich vermute, ich empfinde</b>) und unterscheide dabei zwischen Beobachtung und Interpretation. Ordne
+            anschließend das Werk auf der Skala zwischen Mensch und Natur ein und begründe, wer deiner Meinung nach die
+            entscheidende Rolle im Bild spielt.</p>
+        <div class="task-card"><label class="tiny">Ich sehe (Beobachtung)</label><textarea data-save="human-see"
+                                                                                           placeholder="Was ist tatsächlich im Bild zu sehen?"
+                                                                                           style="min-height:105px;margin:8px 0 18px"></textarea><label
+                class="tiny">Ich vermute (Interpretation)</label><textarea data-save="human-guess"
+                                                                           placeholder="Was könnte das bedeuten?"
+                                                                           style="min-height:105px;margin:8px 0 18px"></textarea><label
+                class="tiny">Ich empfinde (Wirkung auf mich)</label><textarea data-save="human-feel"
+                                                                              placeholder="Welche Stimmung oder Gefühle entstehen?"
+                                                                              style="min-height:105px;margin:8px 0 18px"></textarea>
+            <div class="human-slider">
+                <div class="slider-wrap"><input type="range" id="humanNature" min="0" max="100" value="50"
+                                                aria-label="Skala Mensch bis Natur">
+                    <div class="range-labels"><span>Mensch</span><span>Natur</span></div>
+                </div>
+            </div>
+            <textarea data-save="human-reason"
+                      placeholder="Warum spielt für dich eher der Mensch oder die Natur die entscheidende Rolle?"
+                      style="min-height:120px;margin-top:16px"></textarea>
+        </div>
+    </div>
+</section>
+<section class="rest" id="s9"><span class="section-number">09 / 10</span>
+    <div class="wrap reveal">
+        <p class="bodycopy" style="font-size:clamp(1.5rem, 3vw, 2.1rem)">In dem zweiten Stock findest du einen
+            Fernseher und viele Sitzsäcke. Jetzt kannst du dich ausruhen und das Leben unter dem Wasser
+            beobachten.</p>
+        <p class="tiny" style="font-size:clamp(1.05rem, 1.6vw, 1.3rem)">Lass dir Zeit. Du musst hier nichts
+            beantworten.</p></div>
+</section>
+<section class="mood-section" id="s10"><span class="section-number">10 / 10</span>
+    <div class="wrap reveal">
+        <div class="kicker">Zurück an die Oberfläche</div>
+        <h2 class="headline">Du bist am Ende der Ausstellung angekommen. Wie geht es dir gerade? Hat etwas in dir
+            geändert?</h2>
+        <div class="mood-layout">
+            <div class="ocean-visual">
+                <div class="mood-options" id="mood-end"></div>
+            </div>
+        </div>
+        <div class="task-card"><textarea data-save="answer-10"
+                                         placeholder="Hat sich etwas verändert? Was nimmst du aus der Ausstellung mit?"
+                                         style="min-height:145px"></textarea>
+        </div>
+    </div>
+</section>
+<script>
+    const moods = [{label: 'Sehr gut', short: 'Oberfläche'}, {
+        label: 'Gut',
+        short: 'Helles Wasser'
+    }, {label: 'Okay', short: 'Mittlere Tiefe'}, {
+        label: 'Schlecht',
+        short: 'Dunkler Bereich'
+    }, {label: 'Sehr schlecht', short: 'Tiefsee'}];
+
+    function renderMood(id, key) {
+        const root = document.getElementById(id);
+        root.innerHTML = '';
+        let current = localStorage.getItem(key);
+        moods.forEach((m, i) => {
+            const b = document.createElement('button');
+            b.className = 'mood-btn' + (String(i) === current ? ' active' : '');
+            b.innerHTML = `<span>${m.label}<small>${m.short}</small></span>`;
+            b.addEventListener('click', () => {
+                const isActive = String(i) === localStorage.getItem(key);
+                if (isActive) {
+                    localStorage.removeItem(key)
+                } else {
+                    localStorage.setItem(key, i)
+                }
+                renderMood(id, key)
+            });
+            root.appendChild(b)
+        })
+    }
+
+    renderMood('mood-start', 'mood-start');
+    renderMood('mood-end', 'mood-end');
+    // local answer storage
+    document.querySelectorAll('[data-save]').forEach(el => {
+        const k = el.dataset.save;
+        el.value = localStorage.getItem(k) || '';
+        el.addEventListener('input', () => localStorage.setItem(k, el.value))
+    });
+    // human-nature slider persistence
+    const hn = document.getElementById('humanNature');
+    hn.value = localStorage.getItem('human-nature') || 50;
+    hn.addEventListener('input', () => localStorage.setItem('human-nature', hn.value));
+    // sketch canvas: pointer-based drawing and local autosave
+    const canvas = document.getElementById('drawing'), ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    let drawing = false, color = '#111111', tool = 'pen', size = 5, undoStack = [];
+
+    function loadSketch() {
+        const saved = localStorage.getItem('sketch');
+        if (saved) {
+            const img = new Image();
+            img.onload = () => ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            img.src = saved
+        }
+    }
+
+    loadSketch();
+
+    function snapshot() {
+        undoStack.push(canvas.toDataURL('image/jpeg', .65));
+        if (undoStack.length > 8) undoStack.shift()
+    }
+
+    function saveSketch() {
+        try {
+            localStorage.setItem('sketch', canvas.toDataURL('image/jpeg', .62))
+        } catch (e) {
+            document.querySelector('#s4 .save-note').textContent = 'Speichern nicht möglich (Speicherlimit).'
+        }
+    }
+
+    function pos(e) {
+        const r = canvas.getBoundingClientRect();
+        return {x: (e.clientX - r.left) * canvas.width / r.width, y: (e.clientY - r.top) * canvas.height / r.height}
+    }
+
+    canvas.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        canvas.setPointerCapture(e.pointerId);
+        snapshot();
+        drawing = true;
+        let p = pos(e);
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y)
+    });
+    canvas.addEventListener('pointermove', e => {
+        if (!drawing) return;
+        const p = pos(e);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = tool === 'eraser' ? Math.max(size * 3, 18) : size;
+        ctx.strokeStyle = tool === 'eraser' ? '#ffffff' : color;
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke()
+    });
+
+    function endDraw() {
+        if (drawing) {
+            drawing = false;
+            saveSketch()
+        }
+    }
+
+    canvas.addEventListener('pointerup', endDraw);
+    canvas.addEventListener('pointercancel', endDraw);
+    document.getElementById('size').addEventListener('input', e => size = +e.target.value);
+    document.querySelectorAll('[data-tool]').forEach(b => b.addEventListener('click', () => {
+        tool = b.dataset.tool;
+        document.querySelectorAll('[data-tool]').forEach(x => x.classList.toggle('active', x === b))
+    }));
+    document.querySelectorAll('[data-color]').forEach(b => b.addEventListener('click', () => {
+        color = b.dataset.color;
+        tool = 'pen';
+        document.querySelectorAll('[data-tool]').forEach(x => x.classList.toggle('active', x.dataset.tool === 'pen'));
+        document.querySelectorAll('[data-color]').forEach(x => x.classList.toggle('selected', x === b))
+    }));
+    document.getElementById('undo').addEventListener('click', () => {
+        if (undoStack.length) {
+            const img = new Image();
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                saveSketch()
+            };
+            img.src = undoStack.pop()
+        }
+    });
+    document.getElementById('clear').addEventListener('click', () => {
+        snapshot();
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        saveSketch()
+    });
+    // Reveal effects, progress
+    const sections = [...document.querySelectorAll('section')];
+    const observer = new IntersectionObserver(entries => entries.forEach(e => {
+        if (e.isIntersecting) e.target.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'))
+    }), {threshold: .25});
+    sections.forEach(s => observer.observe(s));
+
+    function progress() {
+        const max = document.documentElement.scrollHeight - innerHeight;
+        document.getElementById('progress').style.width = (max > 0 ? scrollY / max * 100 : 0) + '%'
+    }
+
+    addEventListener('scroll', progress, {passive: true});
+    progress();
+
+    // service worker
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./service-worker.js').catch(() => {
+    });
+</script>
+</body>
+</html>
